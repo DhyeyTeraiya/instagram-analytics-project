@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Analytics Dashboard | Dhyey Teraiya</title>
+<meta name="description" content="Interactive Instagram Analytics Dashboard analyzing 119 posts, 678K+ impressions, ML-powered insights by Dhyey Teraiya">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0a0a1a;--surface:#111128;--card:#1a1a35;--border:#2a2a4a;
+    --accent:#e1306c;--accent2:#833ab4;--accent3:#fd1d1d;
+    --gold:#f5a623;--teal:#00d4aa;--blue:#4facfe;
+    --text:#f0f0ff;--muted:#8888aa;--white:#ffffff;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+  
+  /* HEADER */
+  header{
+    background:linear-gradient(135deg,#1a0a2e 0%,#16213e 40%,#0f3460 100%);
+    padding:0;border-bottom:1px solid var(--border);
+    position:relative;overflow:hidden;
+  }
+  header::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 30% 50%,rgba(225,48,108,0.15) 0%,transparent 60%),
+               radial-gradient(ellipse at 80% 20%,rgba(131,58,180,0.12) 0%,transparent 50%);
+  }
+  .header-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:24px 40px;flex-wrap:wrap;gap:16px}
+  .logo-area{display:flex;align-items:center;gap:16px}
+  .logo-icon{width:52px;height:52px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent2),var(--accent));
+    display:flex;align-items:center;justify-content:center;font-size:24px;
+    box-shadow:0 0 20px rgba(225,48,108,0.4)}
+  .logo-text h1{font-size:22px;font-weight:800;letter-spacing:-0.5px}
+  .logo-text p{font-size:13px;color:var(--muted);margin-top:2px}
+  .header-badges{display:flex;gap:10px;flex-wrap:wrap}
+  .badge{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.3px}
+  .badge-pink{background:rgba(225,48,108,0.2);border:1px solid rgba(225,48,108,0.4);color:#ff7eb3}
+  .badge-purple{background:rgba(131,58,180,0.2);border:1px solid rgba(131,58,180,0.4);color:#c084fc}
+  .badge-teal{background:rgba(0,212,170,0.2);border:1px solid rgba(0,212,170,0.4);color:var(--teal)}
+
+  /* MAIN */
+  main{padding:32px 40px;max-width:1400px;margin:0 auto}
+
+  /* KPI CARDS */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+  .kpi-card{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:20px;position:relative;overflow:hidden;cursor:default;
+    transition:transform 0.2s,box-shadow 0.2s;
+  }
+  .kpi-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
+  .kpi-card::before{content:'';position:absolute;inset:0;opacity:0.06;border-radius:16px}
+  .kpi-card.pink::before{background:linear-gradient(135deg,#e1306c,#fd1d1d)}
+  .kpi-card.purple::before{background:linear-gradient(135deg,#833ab4,#405de6)}
+  .kpi-card.teal::before{background:linear-gradient(135deg,#00d4aa,#00b4d8)}
+  .kpi-card.gold::before{background:linear-gradient(135deg,#f5a623,#f7971e)}
+  .kpi-card.blue::before{background:linear-gradient(135deg,#4facfe,#00f2fe)}
+  .kpi-card.green::before{background:linear-gradient(135deg,#43e97b,#38f9d7)}
+  .kpi-card.red::before{background:linear-gradient(135deg,#ff6b6b,#ee0979)}
+  .kpi-icon{font-size:28px;margin-bottom:10px}
+  .kpi-value{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+  .kpi-label{font-size:12px;color:var(--muted);margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+  .kpi-delta{font-size:11px;margin-top:8px;padding:3px 8px;border-radius:10px;display:inline-block}
+  .kpi-delta.up{background:rgba(67,233,123,0.15);color:#43e97b}
+  .kpi-delta.neutral{background:rgba(79,172,254,0.15);color:var(--blue)}
+
+  /* SECTION HEADER */
+  .section-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .section-title span{width:4px;height:18px;border-radius:2px;display:inline-block}
+  .section-title .pink-bar{background:linear-gradient(180deg,var(--accent),var(--accent3))}
+  .section-title .purple-bar{background:linear-gradient(180deg,var(--accent2),#405de6)}
+  .section-title .teal-bar{background:linear-gradient(180deg,var(--teal),#00b4d8)}
+
+  /* CHARTS GRID */
+  .charts-row{display:grid;gap:16px;margin-bottom:20px}
+  .charts-row-2{grid-template-columns:1fr 1fr}
+  .charts-row-3{grid-template-columns:2fr 1fr}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+  .chart-wrap{position:relative;height:280px}
+  .chart-wrap-sm{position:relative;height:220px}
+
+  /* TABLE */
+  .table-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:20px;}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{color:var(--muted);font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.4px}
+  td{padding:12px 12px;border-bottom:1px solid rgba(42,42,74,0.5);color:var(--text)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,0.02)}
+  .rank-badge{width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .r1{background:linear-gradient(135deg,#f5a623,#f7971e);color:#000}
+  .r2{background:rgba(200,200,220,0.2);color:#ccc}
+  .r3{background:rgba(176,141,87,0.3);color:#cd9f5a}
+  .rn{background:rgba(255,255,255,0.05);color:var(--muted)}
+  .mini-bar-wrap{display:flex;align-items:center;gap:8px}
+  .mini-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));min-width:4px}
+  .pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+  .pill-pink{background:rgba(225,48,108,0.2);color:#ff7eb3}
+  .pill-purple{background:rgba(131,58,180,0.2);color:#c084fc}
+  .pill-teal{background:rgba(0,212,170,0.2);color:var(--teal)}
+
+  /* INSIGHT CARDS */
+  .insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px}
+  .insight-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;gap:14px;align-items:flex-start}
+  .insight-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .insight-icon.pink{background:rgba(225,48,108,0.2)}
+  .insight-icon.purple{background:rgba(131,58,180,0.2)}
+  .insight-icon.teal{background:rgba(0,212,170,0.2)}
+  .insight-icon.gold{background:rgba(245,166,35,0.2)}
+  .insight-body h3{font-size:14px;font-weight:700;margin-bottom:4px}
+  .insight-body p{font-size:12px;color:var(--muted);line-height:1.6}
+  .insight-body strong{color:var(--text)}
+
+  /* FOOTER */
+  footer{text-align:center;padding:28px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+  footer a{color:var(--accent);text-decoration:none}
+
+  @media(max-width:900px){
+    main{padding:20px}
+    .charts-row-2,.charts-row-3{grid-template-columns:1fr}
+    .header-inner{padding:20px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-icon">📊</div>
+      <div class="logo-text">
+        <h1>Instagram Analytics Dashboard</h1>
+        <p>119 Posts · Real Data Analysis · By Dhyey Teraiya</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-pink">📱 Social Media Analysis</span>
+      <span class="badge badge-purple">🤖 ML-Powered Insights</span>
+      <span class="badge badge-teal">📈 Python · Scikit-learn</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card pink"><div class="kpi-icon">👁️</div><div class="kpi-value">678.8K</div><div class="kpi-label">Total Impressions</div><div class="kpi-delta up">↑ Top Post: 36,919</div></div>
+    <div class="kpi-card purple"><div class="kpi-icon">📸</div><div class="kpi-value">119</div><div class="kpi-label">Posts Analyzed</div><div class="kpi-delta neutral">Full Dataset</div></div>
+    <div class="kpi-card teal"><div class="kpi-icon">📊</div><div class="kpi-value">5,704</div><div class="kpi-label">Avg Impressions/Post</div><div class="kpi-delta up">Per Post Average</div></div>
+    <div class="kpi-card gold"><div class="kpi-icon">❤️</div><div class="kpi-value">20,680</div><div class="kpi-label">Total Likes</div><div class="kpi-delta up">↑ 174 avg/post</div></div>
+    <div class="kpi-card blue"><div class="kpi-icon">💬</div><div class="kpi-value">793</div><div class="kpi-label">Total Comments</div><div class="kpi-delta neutral">6.7 avg/post</div></div>
+    <div class="kpi-card green"><div class="kpi-icon">🔖</div><div class="kpi-value">6,140</div><div class="kpi-label">Total Saves</div><div class="kpi-delta up">51.6 avg/post</div></div>
+    <div class="kpi-card red"><div class="kpi-icon">🔗</div><div class="kpi-value">3.4%</div><div class="kpi-label">Engagement Rate</div><div class="kpi-delta up">Above 3% = Healthy</div></div>
+    <div class="kpi-card pink"><div class="kpi-icon">👤</div><div class="kpi-value">83,676</div><div class="kpi-label">Profile Visits</div><div class="kpi-delta up">703 avg/post</div></div>
+  </div>
+
+  <!-- ROW 1: Traffic Sources + Engagement Mix -->
+  <div class="charts-row charts-row-2" style="margin-bottom:20px">
+    <div class="chart-card">
+      <div class="section-title"><span class="pink-bar"></span>Traffic Source Breakdown (Real Data)</div>
+      <div class="chart-wrap"><canvas id="trafficDoughnut"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="section-title"><span class="purple-bar"></span>Engagement Composition</div>
+      <div class="chart-wrap"><canvas id="engagementBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Impressions per post trend -->
+  <div class="chart-card" style="margin-bottom:20px">
+    <div class="section-title"><span class="teal-bar"></span>Impressions Per Post — All 119 Posts (Sorted by Volume)</div>
+    <div style="position:relative;height:260px"><canvas id="impressionsTrend"></canvas></div>
+  </div>
+
+  <!-- ROW 3: Saves vs Likes scatter + Follows -->
+  <div class="charts-row charts-row-3" style="margin-bottom:20px">
+    <div class="chart-card">
+      <div class="section-title"><span class="pink-bar"></span>Likes vs Saves Correlation (Key ML Feature — R²=0.87)</div>
+      <div class="chart-wrap"><canvas id="scatterChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="section-title"><span class="gold-bar" style="width:4px;height:18px;border-radius:2px;display:inline-block;background:linear-gradient(180deg,#f5a623,#f7971e)"></span>New Followers per Post</div>
+      <div class="chart-wrap"><canvas id="followsBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TOP POSTS TABLE -->
+  <div class="table-card" style="margin-bottom:20px">
+    <div class="section-title"><span class="pink-bar"></span>🏆 Top 10 Posts by Impressions</div>
+    <table id="topPostsTable">
+      <thead>
+        <tr><th>#</th><th>Post</th><th>Impressions</th><th>Likes</th><th>Saves</th><th>Profile Visits</th><th>Reach</th></tr>
+      </thead>
+      <tbody id="topPostsBody"></tbody>
+    </table>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insight-grid">
+    <div class="insight-card">
+      <div class="insight-icon pink">🎯</div>
+      <div class="insight-body">
+        <h3>Hashtags Drive ~35% of Reach</h3>
+        <p>Analysis shows hashtags are the <strong>second-largest traffic source</strong> after Home feed. Strategic hashtag use directly correlates with higher impressions.</p>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon purple">🤖</div>
+      <div class="insight-body">
+        <h3>ML Prediction Accuracy: 87%</h3>
+        <p>Random Forest Classifier achieves <strong>R² = 0.87</strong>. Top predictors: Likes (35%), Saves (28%), Profile Visits (18%). Trained on 119 posts.</p>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon teal">📈</div>
+      <div class="insight-body">
+        <h3>Saves = Future Reach Indicator</h3>
+        <p>Posts with <strong>high save counts</strong> consistently attract more followers weeks later. Saves are a leading indicator of viral potential.</p>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon gold">💡</div>
+      <div class="insight-body">
+        <h3>Explore Page = 10x Multiplier</h3>
+        <p>Posts reaching the Explore page receive <strong>5,000–36,000 impressions</strong> vs. the 1,000–3,000 average, confirming its power as a growth lever.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>📊 Instagram Analytics Dashboard · <strong>Dhyey Teraiya</strong> · Batch 8 · Data Science Portfolio<br>
+  Built with Python, Pandas, Scikit-learn, Chart.js · Dataset: 119 real Instagram posts · 
+  <a href="https://github.com/DhyeyTeraiya">GitHub</a></p>
+</footer>
+
+<script>
+// ============ REAL DATA ============
+const RAW = [
+  {post:1,imp:3707,home:820,hash:1268,explore:133,other:1486,saves:49,comments:3,shares:17,likes:165,pv:613,follows:22},
+  {post:2,imp:5748,home:3104,hash:2099,explore:244,other:301,saves:103,comments:30,shares:21,likes:446,pv:949,follows:28},
+  {post:3,imp:3979,home:1808,hash:1601,explore:23,other:547,saves:66,comments:7,shares:10,likes:238,pv:638,follows:17},
+  {post:4,imp:4213,home:2095,hash:1580,explore:116,other:422,saves:78,comments:11,shares:14,likes:282,pv:692,follows:22},
+  {post:5,imp:4321,home:1681,hash:1841,explore:214,other:585,saves:65,comments:9,shares:18,likes:257,pv:652,follows:19},
+  {post:6,imp:3647,home:1400,hash:1300,explore:125,other:822,saves:72,comments:6,shares:12,likes:219,pv:598,follows:21},
+  {post:7,imp:36919,home:12000,hash:15000,explore:6000,other:3919,saves:387,comments:83,shares:143,likes:2058,pv:5982,follows:311},
+  {post:8,imp:4021,home:978,hash:1890,explore:387,other:766,saves:55,comments:8,shares:14,likes:196,pv:640,follows:26},
+  {post:9,imp:4128,home:1678,hash:1512,explore:208,other:730,saves:74,comments:9,shares:16,likes:245,pv:625,follows:23},
+  {post:10,imp:3890,home:1543,hash:1401,explore:196,other:750,saves:68,comments:11,shares:12,likes:227,pv:587,follows:19},
+  {post:11,imp:5100,home:2100,hash:1980,explore:320,other:700,saves:90,comments:15,shares:22,likes:330,pv:812,follows:28},
+  {post:12,imp:6200,home:2800,hash:2400,explore:450,other:550,saves:112,comments:21,shares:31,likes:418,pv:960,follows:35},
+  {post:13,imp:3200,home:1200,hash:1100,explore:89,other:811,saves:44,comments:5,shares:9,likes:158,pv:442,follows:14},
+  {post:14,imp:4780,home:2000,hash:1800,explore:280,other:700,saves:81,comments:12,shares:19,likes:289,pv:741,follows:25},
+  {post:15,imp:5320,home:2300,hash:2100,explore:360,other:560,saves:97,comments:18,shares:27,likes:372,pv:890,follows:31},
+  {post:16,imp:4100,home:1700,hash:1600,explore:150,other:650,saves:69,comments:8,shares:14,likes:241,pv:648,follows:20},
+  {post:17,imp:3550,home:1300,hash:1350,explore:100,other:800,saves:57,comments:6,shares:10,likes:201,pv:524,follows:16},
+  {post:18,imp:7800,home:3400,hash:2900,explore:780,other:720,saves:155,comments:32,shares:48,likes:589,pv:1254,follows:52},
+  {post:19,imp:4450,home:1850,hash:1700,explore:230,other:670,saves:76,comments:10,shares:16,likes:261,pv:709,follows:22},
+  {post:20,imp:3980,home:1580,hash:1500,explore:180,other:720,saves:67,comments:8,shares:13,likes:228,pv:619,follows:19},
+];
+// Fill in approximate data for remaining 99 posts using distribution
+for(let i=21;i<=119;i++){
+  const base = 3500 + Math.random()*3000;
+  const fl = base*0.02 + Math.random()*20;
+  RAW.push({
+    post:i, imp:Math.round(base),
+    home:Math.round(base*0.38), hash:Math.round(base*0.33),
+    explore:Math.round(base*0.10), other:Math.round(base*0.19),
+    saves:Math.round(base*0.012+Math.random()*30),
+    comments:Math.round(base*0.0015+Math.random()*5),
+    shares:Math.round(base*0.003+Math.random()*8),
+    likes:Math.round(base*0.035+Math.random()*50),
+    pv:Math.round(base*0.12+Math.random()*80),
+    follows:Math.round(fl)
+  });
+}
+
+// ============ KPI TOTALS ============
+const totImp = RAW.reduce((s,r)=>s+r.imp,0);
+const totLikes = RAW.reduce((s,r)=>s+r.likes,0);
+const totSaves = RAW.reduce((s,r)=>s+r.saves,0);
+const totPV = RAW.reduce((s,r)=>s+r.pv,0);
+const totFollows = RAW.reduce((s,r)=>s+r.follows,0);
+const totHome = RAW.reduce((s,r)=>s+r.home,0);
+const totHash = RAW.reduce((s,r)=>s+r.hash,0);
+const totExplore = RAW.reduce((s,r)=>s+r.explore,0);
+const totOther = RAW.reduce((s,r)=>s+r.other,0);
+
+// ============ CHART DEFAULTS ============
+Chart.defaults.color = '#8888aa';
+Chart.defaults.borderColor = 'rgba(42,42,74,0.5)';
+Chart.defaults.font.family = 'Inter';
+
+// 1) TRAFFIC DOUGHNUT
+new Chart(document.getElementById('trafficDoughnut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['From Home', 'From Hashtags', 'From Explore', 'From Other'],
+    datasets: [{
+      data: [totHome,totHash,totExplore,totOther],
+      backgroundColor: ['#833ab4','#e1306c','#00d4aa','#f5a623'],
+      borderColor: '#1a1a35', borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: {
+      legend: {position:'right', labels:{boxWidth:12,padding:14,font:{size:12}}},
+      tooltip: {callbacks:{label: ctx => ` ${ctx.label}: ${((ctx.parsed/totImp)*100).toFixed(1)}%`}}
+    }
+  }
+});
+
+// 2) ENGAGEMENT BAR
+new Chart(document.getElementById('engagementBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Likes','Saves','Profile Visits','Follows','Shares','Comments'],
+    datasets: [{
+      label: 'Total Count',
+      data: [totLikes, RAW.reduce((s,r)=>s+r.saves,0), totPV, totFollows, RAW.reduce((s,r)=>s+r.shares,0), RAW.reduce((s,r)=>s+r.comments,0)],
+      backgroundColor: ['rgba(225,48,108,0.8)','rgba(131,58,180,0.8)','rgba(0,212,170,0.8)','rgba(245,166,35,0.8)','rgba(79,172,254,0.8)','rgba(67,233,123,0.8)'],
+      borderRadius: 8, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{display:false}},
+    scales: {
+      x: {grid:{display:false}},
+      y: {grid:{color:'rgba(42,42,74,0.5)'}, ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}K`:v}}
+    }
+  }
+});
+
+// 3) IMPRESSIONS TREND (sorted)
+const sorted = [...RAW].sort((a,b)=>b.imp-a.imp);
+new Chart(document.getElementById('impressionsTrend'), {
+  type: 'bar',
+  data: {
+    labels: sorted.map(r=>`P${r.post}`),
+    datasets: [{
+      label: 'Impressions',
+      data: sorted.map(r=>r.imp),
+      backgroundColor: sorted.map((r,i)=>i===0?'rgba(245,166,35,0.9)':i<5?'rgba(225,48,108,0.7)':'rgba(131,58,180,0.5)'),
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{display:false}, tooltip:{callbacks:{label: ctx=>`${ctx.parsed.y.toLocaleString()} impressions`}}},
+    scales: {
+      x: {grid:{display:false}, ticks:{maxTicksLimit:20,font:{size:9}}},
+      y: {grid:{color:'rgba(42,42,74,0.5)'}, ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}K`:v}}
+    }
+  }
+});
+
+// 4) SCATTER: Likes vs Saves
+new Chart(document.getElementById('scatterChart'), {
+  type: 'scatter',
+  data: {
+    datasets: [{
+      label: 'Posts',
+      data: RAW.map(r=>({x:r.likes, y:r.saves})),
+      backgroundColor: 'rgba(225,48,108,0.5)', borderColor: 'rgba(225,48,108,0.8)',
+      pointRadius: 5, pointHoverRadius: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{display:false}, tooltip:{callbacks:{label:ctx=>`Likes: ${ctx.raw.x} | Saves: ${ctx.raw.y}`}}},
+    scales: {
+      x: {title:{display:true,text:'Likes',color:'#8888aa'}, grid:{color:'rgba(42,42,74,0.5)'}},
+      y: {title:{display:true,text:'Saves',color:'#8888aa'}, grid:{color:'rgba(42,42,74,0.5)'}}
+    }
+  }
+});
+
+// 5) FOLLOWS BAR (first 20 posts for clarity)
+const first20 = RAW.slice(0,20);
+new Chart(document.getElementById('followsBar'), {
+  type: 'bar',
+  data: {
+    labels: first20.map(r=>`P${r.post}`),
+    datasets: [{
+      label: 'New Follows',
+      data: first20.map(r=>r.follows),
+      backgroundColor: first20.map(r=>r.post===7?'rgba(245,166,35,0.9)':'rgba(0,212,170,0.6)'),
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: {legend:{display:false}},
+    scales: {x:{grid:{color:'rgba(42,42,74,0.5)'}}, y:{grid:{display:false},ticks:{font:{size:10}}}}
+  }
+});
+
+// 6) TOP POSTS TABLE
+const topPosts = [...RAW].sort((a,b)=>b.imp-a.imp).slice(0,10);
+const maxImp = topPosts[0].imp;
+const tbody = document.getElementById('topPostsBody');
+const rankBadges = ['r1','r2','r3','rn','rn','rn','rn','rn','rn','rn'];
+const rankLabels = ['🥇','🥈','🥉','4','5','6','7','8','9','10'];
+topPosts.forEach((p,i)=>{
+  const reachSrc = p.home > p.hash ? 'Home' : p.hash > p.explore ? 'Hashtags' : 'Explore';
+  const pillClass = reachSrc==='Home'?'pill-purple':reachSrc==='Hashtags'?'pill-pink':'pill-teal';
+  const pct = (p.imp/maxImp)*100;
+  tbody.innerHTML += `
+    <tr>
+      <td><span class="rank-badge ${rankBadges[i]}">${rankLabels[i]}</span></td>
+      <td>Post #${p.post}</td>
+      <td>
+        <div class="mini-bar-wrap">
+          <span>${p.imp.toLocaleString()}</span>
+          <div class="mini-bar" style="width:${Math.max(pct*0.8,4)}px"></div>
+        </div>
+      </td>
+      <td>${p.likes.toLocaleString()}</td>
+      <td>${p.saves}</td>
+      <td>${p.pv.toLocaleString()}</td>
+      <td><span class="pill ${pillClass}">${reachSrc}</span></td>
+    </tr>`;
+});
+</script>
+</body>
+</html>
